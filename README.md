@@ -67,7 +67,7 @@ This project provides a comprehensive E-commerce backend API built with Django R
 
 ### API Documentation
 
-API documentation is available via Swagger UI. You can access [here](https://theofficialnikolastoykov.github.io/e-commerce-restful-api/).
+API documentation is available via Swagger UI. You can access it [here](https://theofficialnikolastoykov.github.io/e-commerce-restful-api/).
 
 For example:
 
