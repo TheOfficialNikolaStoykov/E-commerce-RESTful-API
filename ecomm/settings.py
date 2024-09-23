@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'users_app.apps.UsersAppConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'phonenumber_field'
+    'phonenumber_field',
+    'drf_spectacular',
+    'drf_spectacular_sidecar'
 ]
 
 MIDDLEWARE = [
@@ -136,14 +138,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
 
 
-STRIPE_SECRET_KEY = "sk_test_51PyvDe2MqVpaBsk5gbcgKLxVeuK8iMUMctGEfMqbgmnaH0hNZCsTmX9JhpIgSI2C7flh4goy16XZCw03kXuw4GCj00zqEjgceh"
-SHIPPO_SECRET_KEY = "shippo_test_cb5894bf13971f0563e2273effa9482005d6d699"
+STRIPE_SECRET_KEY = "sk_test_51PyvDe2MqVpaBsk5gbcgKLxVeuK8iMUMctGEfMqbgmnaH0hNZCsTmX9JhpIgSI2C7flh4goy16XZCw03kXuw4GCj00zqEjgceh" # Change to ENV variables when deploying
+SHIPPO_SECRET_KEY = "shippo_test_cb5894bf13971f0563e2273effa9482005d6d699" # Change to ENV variables when deploying
 
 
 SHIPPING_ADDRESS_PERSON_NAME = "Shawn Ippotle"
@@ -154,3 +157,24 @@ SHIPPING_ADDRESS_ZIP = "94117"
 SHIPPING_COUNTRY = "US"
 SHIPPING_PHONE_NUMBER = "+14185438090"
 SHIPPING_EMAIL = "example@example.com"
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'E-commerce Store RESTful API',
+    'DESCRIPTION': '''This API powers the backend for an e-commerce platform, providing comprehensive management for products, users, orders, and reviews. It offers features to handle all aspects of an online store, from user authentication to product listings and order fulfillment.
+
+Key Features:
+- **User Management**: Secure user authentication, registration, login, and profile management. Roles include customers and admin users, with access control based on user roles.
+- **Product Management**: Full CRUD functionality for managing products, including listing, creating, updating, and deleting products. Product categories, images, and inventory are also handled within the API. Admin access is required for product modifications.
+- **Order Management**: Allows users to create and manage their orders. Admin users can view, update, and track order statuses for fulfillment.
+- **Review System**: Registered users can submit, update, and delete product reviews. The API supports review filtering by product and user activity.
+- **Rate Limiting**: Controls API usage with rate limits to ensure efficient performance for both anonymous and authenticated users.
+- **Search and Filtering**: Supports product search and filtering based on various criteria such as categories, price range, and availability.
+
+Please refer to the endpoints below for detailed operations and supported data structures in this API.''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+    },
+}

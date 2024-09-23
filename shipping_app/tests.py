@@ -7,8 +7,8 @@ from cart_app.models import *
 from orders_app.models import *
 from payments_app.models import Payment
 from products_app.models import *
-from users_app.models import User
 from shipping_app.models import *
+from users_app.models import User
 
 
 class UserTestCase(APITestCase):

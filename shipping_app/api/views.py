@@ -1,22 +1,30 @@
+import shippo
+import shippo.models
+import shippo.models.components
+import shippo.models.errors
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-import shippo.models
-import shippo.models.components
-import shippo.models.errors
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from orders_app.models import Order
 from shipping_app.calculate_shipping_rates import delivery_shippo
-
 from .serializers import *
-import shippo
 
 
+@extend_schema(
+    request=None,
+    responses={200: OpenApiResponse(response=None, description="List of shipping rates")},
+    description="Get shipping rates for an order."
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def get_shipping_rates(request, id):
+    """
+    Get shipping rates for an order.
+    """
     order = get_object_or_404(Order, id=id, user=request.user)
 
     name = request.data.get("name")
@@ -31,7 +39,8 @@ def get_shipping_rates(request, id):
     
     shipping_method = ShippingMethod.objects.create(
         name="shippo",
-        price=order.total_price)
+        price=order.total_price
+    )
     
     delivery_shippo.name = name
     delivery_shippo.street1 = street1
@@ -61,9 +70,18 @@ def get_shipping_rates(request, id):
     
     return Response(rates, status=status.HTTP_200_OK)
 
+
+@extend_schema(
+    request=None,
+    responses={201: OpenApiResponse(response=None, description="Label purchased successfully")},
+    description="Schedule a delivery for an order using a selected shipping rate."
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def schedule_delivery(request, id):
+    """
+    Schedule a delivery for an order using a selected shipping rate.
+    """
     order = get_object_or_404(Order, id=id, user=request.user)
 
     selected_rate_id = request.data.get("rate_id")
@@ -100,9 +118,18 @@ def schedule_delivery(request, id):
         "status": delivery.status
     }, status=status.HTTP_201_CREATED)
 
+
+@extend_schema(
+    request=None,
+    responses={200: OpenApiResponse(response=None, description="Delivery status updated successfully")},
+    description="Change the delivery status for an order."
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def change_delivery_status(request, id):
+    """
+    Change the delivery status for an order.
+    """
     delivery = get_object_or_404(Delivery, id=id)
     
     new_status = request.data.get("status")
@@ -117,14 +144,20 @@ def change_delivery_status(request, id):
         "message": "Delivery status updated successfully",
         "new_status": delivery.status
     }, status=status.HTTP_200_OK)
-    
 
+
+@extend_schema(
+    responses={200: DeliverySerializer},
+    description="Check the delivery status of an order."
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def check_delivery_status(request, id):
+    """
+    Check the delivery status of an order.
+    """
     delivery = get_object_or_404(Delivery, id=id)
     
     serializer = DeliverySerializer(delivery)
     
     return Response(serializer.data)
-    

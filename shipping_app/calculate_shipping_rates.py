@@ -2,7 +2,6 @@ import shippo
 from django.conf import settings
 from shippo.models import components
 
-
 shippo_sdk = shippo.Shippo(api_key_header=settings.SHIPPO_SECRET_KEY)
 
 class DeliveryShippo():
