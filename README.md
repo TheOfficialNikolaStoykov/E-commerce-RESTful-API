@@ -98,7 +98,7 @@ coverage report
 - **Shipping Integration**: Shippo API
 - **Authentication**: Django Token Authentication
 - **Database**: SQLite
-- **API Documentation**: Swagger UI via drf-spectacular
+- **API Documentation**: Swagger UI
 
 ## License
 
