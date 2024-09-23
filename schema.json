@@ -1,0 +1,1781 @@
+openapi: 3.0.3
+info:
+  title: E-commerce Store RESTful API
+  version: 1.0.0
+  description: |-
+    This API powers the backend for an e-commerce platform, providing comprehensive management for products, users, orders, and reviews. It offers features to handle all aspects of an online store, from user authentication to product listings and order fulfillment.
+
+    Key Features:
+    - **User Management**: Secure user authentication, registration, login, and profile management. Roles include customers and admin users, with access control based on user roles.
+    - **Product Management**: Full CRUD functionality for managing products, including listing, creating, updating, and deleting products. Product categories, images, and inventory are also handled within the API. Admin access is required for product modifications.
+    - **Order Management**: Allows users to create and manage their orders. Admin users can view, update, and track order statuses for fulfillment.
+    - **Review System**: Registered users can submit, update, and delete product reviews. The API supports review filtering by product and user activity.
+    - **Rate Limiting**: Controls API usage with rate limits to ensure efficient performance for both anonymous and authenticated users.
+    - **Search and Filtering**: Supports product search and filtering based on various criteria such as categories, price range, and availability.
+
+    Please refer to the endpoints below for detailed operations and supported data structures in this API.
+paths:
+  /api/account/delete/{id}/:
+    delete:
+      operationId: api_account_delete_destroy
+      description: Delete a user profile by ID. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/account/edit/{id}/:
+    put:
+      operationId: api_account_edit_update
+      description: Update a user profile using PUT. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+    patch:
+      operationId: api_account_edit_partial_update
+      description: Partially update a user profile using PATCH. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+  /api/account/login/:
+    post:
+      operationId: api_account_login_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+  /api/account/logout/:
+    post:
+      operationId: api_account_logout_create
+      description: Log out the current user by deleting their auth token.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: Token deleted successfully
+        '400':
+          description: Bad Request
+  /api/account/register/:
+    post:
+      operationId: api_account_register_create
+      description: Register a new user with profile details and obtain a token.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistration'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          description: Registration Successful with profile details
+        '400':
+          description: Bad Request
+  /api/account/view/{id}/:
+    get:
+      operationId: api_account_view_retrieve
+      description: Retrieve a single user profile by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+  /api/account/view/all/:
+    get:
+      operationId: api_account_view_all_list
+      description: List all user profiles. Accessible only to admin users.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileView'
+          description: ''
+  /api/cart/:
+    get:
+      operationId: api_cart_retrieve
+      description: Retrieve the authenticated user's cart details.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/cart/cart_item/add/:
+    post:
+      operationId: api_cart_cart_item_add_create
+      description: Add an item to the authenticated user's cart.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/cart/cart_item/delete/{id}/:
+    delete:
+      operationId: api_cart_cart_item_delete_destroy
+      description: Delete an item from the authenticated user's cart.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/cart/cart_item/edit/{id}/:
+    put:
+      operationId: api_cart_cart_item_edit_update
+      description: Edit an item in the authenticated user's cart.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItem'
+          description: ''
+  /api/cart/clear/:
+    delete:
+      operationId: api_cart_clear_destroy
+      description: Clear all items from the authenticated user's cart.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/deliveries/{id}/change_status/:
+    post:
+      operationId: api_deliveries_change_status_create
+      description: Change the delivery status for an order.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Delivery status updated successfully
+  /api/deliveries/{id}/check_status/:
+    get:
+      operationId: api_deliveries_check_status_retrieve
+      description: Check the delivery status of an order.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/{id}/get_shipping_rates/:
+    post:
+      operationId: api_deliveries_get_shipping_rates_create
+      description: Get shipping rates for an order.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: List of shipping rates
+  /api/deliveries/{id}/schedule_delivery/:
+    post:
+      operationId: api_deliveries_schedule_delivery_create
+      description: Schedule a delivery for an order using a selected shipping rate.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          description: Label purchased successfully
+  /api/orders/:
+    get:
+      operationId: api_orders_list
+      description: List all orders. Accessible only to admin users.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderView'
+          description: ''
+  /api/orders/{id}/status/:
+    patch:
+      operationId: api_orders_status_partial_update
+      description: Change the status of an order. Accessible only to admin users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderCreate'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreate'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/orders/admin/{id}/:
+    get:
+      operationId: api_orders_admin_retrieve
+      description: Retrieve a single order by its ID. Accessible only to admin users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderView'
+          description: ''
+  /api/orders/checkout/{id}/:
+    post:
+      operationId: api_orders_checkout_create
+      description: Checkout the authenticated user's cart and create an order.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreate'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/orders/my-orders/:
+    get:
+      operationId: api_orders_my_orders_list
+      description: List the authenticated user's orders.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderView'
+          description: ''
+  /api/orders/user/{id}/:
+    get:
+      operationId: api_orders_user_retrieve
+      description: Retrieve a single order for the authenticated user by its ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderView'
+          description: ''
+  /api/payments/order/{id}/:
+    post:
+      operationId: api_payments_order_create
+      description: Process payment for an order.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          description: Payment processed successfully
+        '400':
+          description: Bad Request
+  /api/payments/order/status/{id}/:
+    get:
+      operationId: api_payments_order_status_retrieve
+      description: Retrieve payment status for a specific payment.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/products/brands/create/:
+    post:
+      operationId: api_products_brands_create_create
+      description: Create a new brand. Admin only.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Brand'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/brands/delete/{id}/:
+    delete:
+      operationId: api_products_brands_delete_destroy
+      description: Delete a brand. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/products/brands/edit/{id}/:
+    put:
+      operationId: api_products_brands_edit_update
+      description: Edit a brand. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Brand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Brand'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+        '400':
+          description: Bad Request
+    patch:
+      operationId: api_products_brands_edit_partial_update
+      description: Edit a brand. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBrand'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/brands/view/{id}/:
+    get:
+      operationId: api_products_brands_view_retrieve
+      description: Retrieve a single brand by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/products/brands/view/all/:
+    get:
+      operationId: api_products_brands_view_all_list
+      description: List all brands.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/products/categories/create/:
+    post:
+      operationId: api_products_categories_create_create
+      description: Create a new category. Admin only.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Category'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Category'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/categories/delete/{id}/:
+    delete:
+      operationId: api_products_categories_delete_destroy
+      description: Delete a category. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/products/categories/edit/{id}/:
+    put:
+      operationId: api_products_categories_edit_update
+      description: Edit a category. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Category'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Category'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Bad Request
+    patch:
+      operationId: api_products_categories_edit_partial_update
+      description: Edit a category. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/categories/view/{id}/:
+    get:
+      operationId: api_products_categories_view_retrieve
+      description: Retrieve a single category by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /api/products/categories/view/all/:
+    get:
+      operationId: api_products_categories_view_all_list
+      description: List all categories.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+  /api/products/create/:
+    post:
+      operationId: api_products_create_create
+      description: Create a new product. Admin only.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Product'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Product'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/delete/{id}/:
+    delete:
+      operationId: api_products_delete_destroy
+      description: Delete a product. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/products/edit/{id}/:
+    put:
+      operationId: api_products_edit_update
+      description: Edit a product. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Product'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Product'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Bad Request
+    patch:
+      operationId: api_products_edit_partial_update
+      description: Edit a product. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/reviews/create/:
+    post:
+      operationId: api_products_reviews_create_create
+      description: Create a new product review. Admin only.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductReview'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/reviews/delete/{id}/:
+    delete:
+      operationId: api_products_reviews_delete_destroy
+      description: Delete a product review. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/products/reviews/edit/{id}/:
+    put:
+      operationId: api_products_reviews_edit_update
+      description: Edit a product review. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductReview'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductReview'
+          description: ''
+        '400':
+          description: Bad Request
+    patch:
+      operationId: api_products_reviews_edit_partial_update
+      description: Edit a product review. Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductReview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductReview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductReview'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductReview'
+          description: ''
+        '400':
+          description: Bad Request
+  /api/products/reviews/view/{id}/:
+    get:
+      operationId: api_products_reviews_view_retrieve
+      description: Retrieve a single product by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/products/reviews/view/all/:
+    get:
+      operationId: api_products_reviews_view_all_list
+      description: List all product reviews.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductReview'
+          description: ''
+  /api/products/view/{id}/:
+    get:
+      operationId: api_products_view_retrieve
+      description: Retrieve a single product by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /api/products/view/all/:
+    get:
+      operationId: api_products_view_all_list
+      description: List all products with filtering and search capabilities.
+      parameters:
+      - in: query
+        name: brand__name
+        schema:
+          type: string
+      - in: query
+        name: category__name
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+          description: ''
+components:
+  schemas:
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        token:
+          type: string
+          readOnly: true
+      required:
+      - password
+      - token
+      - username
+    Brand:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 500
+      required:
+      - description
+      - id
+      - name
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+      required:
+      - created_at
+      - id
+      - updated_at
+      - user
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        cart:
+          type: integer
+        product:
+          type: integer
+      required:
+      - cart
+      - id
+      - product
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 500
+      required:
+      - description
+      - id
+      - name
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tracking_number:
+          type: string
+          maxLength: 30
+        shipping_label_url:
+          type: string
+          format: uri
+          maxLength: 200
+        status:
+          $ref: '#/components/schemas/DeliveryStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        order:
+          type: integer
+        shipping_method:
+          type: integer
+      required:
+      - created_at
+      - id
+      - order
+      - shipping_label_url
+      - shipping_method
+      - status
+      - tracking_number
+    DeliveryStatusEnum:
+      enum:
+      - pending
+      - in_transit
+      - out_for_delivery
+      - delivered
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `in_transit` - In transit
+        * `out_for_delivery` - Out for delivery
+        * `delivered` - Delivered
+        * `failed` - Failed
+    OrderCreate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+    OrderView:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        total_price:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        status:
+          $ref: '#/components/schemas/OrderViewStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date
+          readOnly: true
+        user:
+          type: integer
+      required:
+      - created_at
+      - id
+      - status
+      - total_price
+      - updated_at
+      - user
+    OrderViewStatusEnum:
+      enum:
+      - pending
+      - processing
+      - shipping
+      - delivered
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `processing` - Processing
+        * `shipping` - Shipping
+        * `delivered` - Delivered
+        * `cancelled` - Cancelled
+    PatchedBrand:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 500
+    PatchedCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 500
+    PatchedOrderCreate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date
+          readOnly: true
+    PatchedProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 1000
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+        stock:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+        brand:
+          type: integer
+    PatchedProductReview:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        description:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        product:
+          type: integer
+        user:
+          type: integer
+    PatchedProfileUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 15
+        last_name:
+          type: string
+          maxLength: 15
+        phone_number:
+          type: string
+          maxLength: 128
+        address_line_1:
+          type: string
+          maxLength: 100
+        address_line_2:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 10
+        state:
+          type: string
+          maxLength: 10
+        postal_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        country:
+          type: string
+          maxLength: 10
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        order:
+          type: integer
+      required:
+      - amount
+      - created_at
+      - id
+      - order
+      - payment_method
+      - status
+    PaymentMethodEnum:
+      enum:
+      - stripe
+      type: string
+      description: '* `stripe` - Stripe'
+    PaymentStatusEnum:
+      enum:
+      - pending
+      - completed
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `completed` - Completed
+        * `failed` - Failed
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 15
+        description:
+          type: string
+          maxLength: 1000
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+        stock:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        category:
+          type: integer
+        brand:
+          type: integer
+      required:
+      - brand
+      - category
+      - created_at
+      - description
+      - id
+      - name
+      - price
+      - stock
+      - updated_at
+    ProductReview:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        description:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        product:
+          type: integer
+        user:
+          type: integer
+      required:
+      - created_at
+      - description
+      - id
+      - product
+      - rating
+      - user
+    ProfileRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          maxLength: 10
+        email:
+          type: string
+          format: email
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+          maxLength: 15
+        last_name:
+          type: string
+          maxLength: 15
+        phone_number:
+          type: string
+          maxLength: 128
+        address_line_1:
+          type: string
+          maxLength: 100
+        address_line_2:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 10
+        state:
+          type: string
+          maxLength: 10
+        postal_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        country:
+          type: string
+          maxLength: 10
+      required:
+      - address_line_1
+      - address_line_2
+      - city
+      - country
+      - email
+      - first_name
+      - last_name
+      - password
+      - phone_number
+      - postal_code
+      - state
+      - username
+    ProfileUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 15
+        last_name:
+          type: string
+          maxLength: 15
+        phone_number:
+          type: string
+          maxLength: 128
+        address_line_1:
+          type: string
+          maxLength: 100
+        address_line_2:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 10
+        state:
+          type: string
+          maxLength: 10
+        postal_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        country:
+          type: string
+          maxLength: 10
+      required:
+      - address_line_1
+      - address_line_2
+      - city
+      - country
+      - first_name
+      - last_name
+      - phone_number
+      - postal_code
+      - state
+    ProfileView:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 15
+        last_name:
+          type: string
+          maxLength: 15
+        phone_number:
+          type: string
+          maxLength: 128
+        address_line_1:
+          type: string
+          maxLength: 100
+        address_line_2:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 10
+        state:
+          type: string
+          maxLength: 10
+        postal_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        country:
+          type: string
+          maxLength: 10
+        user:
+          type: integer
+      required:
+      - address_line_1
+      - address_line_2
+      - city
+      - country
+      - first_name
+      - id
+      - last_name
+      - phone_number
+      - postal_code
+      - state
+      - user
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
