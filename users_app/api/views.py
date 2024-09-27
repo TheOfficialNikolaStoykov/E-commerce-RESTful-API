@@ -1,12 +1,14 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import (OpenApiResponse, extend_schema,
+                                   extend_schema_view)
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from drf_spectacular.utils import OpenApiResponse, extend_schema_view, extend_schema
 
 from users_app.signals import *
+
 from .serializers import *
 
 
@@ -20,37 +22,29 @@ from .serializers import *
 )
 @api_view(["POST"])
 def registration_view(request):
-    """
-    Register a new user.
-    """
     serializer = ProfileRegistrationSerializer(data=request.data)
     
-    data = {}
-
     if serializer.is_valid():
         user = serializer.save()
-
         profile = get_object_or_404(Profile, user=user)
 
-        data["response"] = "Registration Successful!"
-        data["username"] = user.username
-        data["first_name"] = profile.first_name
-        data["last_name"] = profile.last_name
-        data["phone_number"] = profile.phone_number
-        data["address_line_1"] = profile.address_line_1
-        data["address_line_2"] = profile.address_line_2
-        data["city"] = profile.city
-        data["state"] = profile.state
-        data["postal_code"] = profile.postal_code
-        data["country"] = profile.country
+        data = {
+            "response": "Registration Successful!",
+            "username": user.username,
+            "first_name": profile.first_name,
+            "last_name": profile.last_name,
+            "phone_number": str(profile.phone_number),
+            "address_line_1": profile.address_line_1,
+            "address_line_2": profile.address_line_2,
+            "city": profile.city,
+            "state": profile.state,
+            "postal_code": profile.postal_code,
+            "country": profile.country,
+            "token": Token.objects.get(user=user).key,
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
 
-        token = Token.objects.get(user=user).key
-        data["token"] = token
-
-    else:
-        data = serializer.errors
-    
-    return Response(data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(

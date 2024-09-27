@@ -15,11 +15,10 @@ def process_payment_stripe(amount, payment_method):
             receipt_email="customer@example.com"
         )
         return {
-            "transaction_id": intent.id,
+            "transaction_id": intent["id"],
             "status": "completed"
         }
     except stripe.error.StripeError as e:
         return {
-            "transaction_id": intent.id,
             "status": "failed"
         }

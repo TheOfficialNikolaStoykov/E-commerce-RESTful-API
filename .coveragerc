@@ -1,0 +1,56 @@
+[run]
+branch = True
+source = .
+omit =
+    ecomm/__init__.py
+    cart_app/__init__.py
+    cart_app/admin.py
+    cart_app/tests.py
+    cart_app/models.py
+    cart_app/views.py
+    cart_app/api/serializers.py
+    orders_app/__init__.py
+    orders_app/admin.py
+    orders_app/tests.py
+    orders_app/models.py
+    orders_app/views.py
+    payments_app/__init__.py
+    payments_app/admin.py
+    payments_app/tests.py
+    payments_app/models.py
+    payments_app/api/serializers.py
+    payments_app/views.py
+    products_app/__init__.py
+    products_app/admin.py
+    products_app/tests.py
+    products_app/models.py
+    products_app/api/serializers.py
+    products_app/views.py
+    shipping_app/__init__.py
+    shipping_app/admin.py
+    shipping_app/tests.py
+    shipping_app/models.py
+    shipping_app/api/serializers.py
+    shipping_app/views.py
+    users_app/__init__.py
+    users_app/admin.py
+    users_app/tests.py
+    users_app/models.py
+    users_app/views.py
+    */apps.py
+    */migrations/*
+    */tests/*
+    manage.py
+    */settings.py
+    */urls.py
+    */wsgi.py
+    */asgi.py
+
+[report]
+fail_under = 100
+show_missing = True
+skip_covered = False
+exclude_lines =
+    pragma: no cover
+    def __str__
+    if __name__ == .__main__.:
